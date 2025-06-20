@@ -43,7 +43,7 @@ class HabitTrackerApp:
         self.data = load_data()
 
         tk.Label(root, text="Selecione a data:").pack()
-        self.date_picker = DateEntry(root, width=12, background='darkblue',
+        self.date_picker = DateEntry(root, width=12, background='lightblue',
                                      foreground='white', borderwidth=2, date_pattern='y-mm-dd')
         self.date_picker.pack(pady=5)
         self.date_picker.bind("<<DateEntrySelected>>", self.on_date_change)
