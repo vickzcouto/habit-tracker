@@ -1,0 +1,64 @@
+{
+  "19-06-2025": {
+    "oração da manhã": true,
+    "meditação manhã": false,
+    "alongamento": false,
+    "exercício físico": false,
+    "caminhada": false,
+    "estudos python": false,
+    "estudos infra": false,
+    "leitura diária": false,
+    "desenho": false,
+    "meditação noturna": true,
+    "oração noturna": true
+  },
+  "20-06-2025": {
+    "oração da manhã": true,
+    "meditação manhã": false,
+    "alongamento": false,
+    "exercício físico": false,
+    "caminhada": false,
+    "estudos python": true,
+    "estudos infra": true,
+    "leitura diária": false,
+    "desenho": false,
+    "meditação noturna": true,
+    "oração noturna": true
+  },
+  "2025-06-16": {
+    "oração da manha": true,
+    "meditação manha": true,
+    "exercicio em casa": false,
+    "caminhada": false,
+    "estudos python": true,
+    "estudos infra": true,
+    "meditação noturna": true,
+    "oração noturna": true,
+    "leitura diária": false,
+    "desenho": false
+  },
+  "2025-06-18": {
+    "oração da manha": true,
+    "meditação manha": false,
+    "exercicio em casa": false,
+    "caminhada": false,
+    "estudos python": true,
+    "estudos infra": true,
+    "meditação noturna": true,
+    "oração noturna": true,
+    "leitura diária": false,
+    "desenho": false
+  },
+  "2025-06-20": {
+    "oração da manha": true,
+    "meditação manha": false,
+    "exercicio em casa": false,
+    "caminhada": false,
+    "estudos python": true,
+    "estudos infra": true,
+    "meditação noturna": true,
+    "oração noturna": true,
+    "leitura diária": true,
+    "desenho": false
+  }
+}
