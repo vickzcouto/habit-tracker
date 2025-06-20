@@ -9,11 +9,3 @@ Aplicativo simples de acompanhamento de hábitos com interface gráfica feita em
 - Interface minimalista com botão de saída
 
 ---
-
-### Como rodar
-
-1. Clone este repositório:
-```bash
-git clone https://github.com/vickzcouto/habit-tracker.git
-cd habit-tracker
-
