@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Hábitos</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 32px; }
+        h1 { text-align: center; color: #d16ba5; }
+        table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
+        th { background: #fceabb; color: #333; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .done { color: #ffee00; font-weight: bold; }
+        .not-done { color: #e57373; }
+        .chart-container { position: relative; margin: 24px 0; }
+        .summary { font-size: 16px; margin-bottom: 16px; }
+        .highlight { background: #fff3cd; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Dashboard de Hábitos</h1>
+    <input type="file" id="fileInput" accept="application/json">
+    <div class="summary" id="summary"></div>
+    <div class="chart-container">
+        <canvas id="barChart" height="80"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="lineChart" height="60"></canvas>
+    </div>
+    <div id="dashboard"></div>
+</div>
+<script>
+    let barChart, lineChart;
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const data = JSON.parse(event.target.result);
+                renderDashboard(data);
+            } catch (err) {
+                document.getElementById('dashboard').innerHTML = '<p style="color:red">Erro ao ler o arquivo JSON.</p>';
+            }
+        };
+        reader.readAsText(file, 'utf-8');
+    });
+
+    function renderDashboard(data) {
+        if (!data || Object.keys(data).length === 0) {
+            document.getElementById('dashboard').innerHTML = '<p>Nenhum dado encontrado.</p>';
+            return;
+        }
+        // Lista fixa de hábitos igual ao Python
+        const habits = [
+            "oração da manhã",
+            "meditação",
+            "alongamento",
+            "exercício físico",
+            "caminhada",
+            "estudos python",
+            "estudos infra",
+            "leitura diária",
+            "desenho",
+            "aprendi algo novo",
+            "gratidão/afirmações",
+            "oração noturna"
+        ];
+        // Gera os últimos 7 dias corridos (incluindo hoje)
+        const today = new Date();
+        const last7Dates = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const dia = String(d.getDate()).padStart(2, '0');
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const ano = d.getFullYear();
+            last7Dates.push(`${dia}-${mes}-${ano}`);
+        }
+        // Frequência de cada hábito nos últimos 7 dias
+        const habitCounts = {};
+        habits.forEach(h => habitCounts[h] = 0);
+        last7Dates.forEach(date => {
+            habits.forEach(habit => {
+                if (data[date] && data[date][habit]) habitCounts[habit]++;
+            });
+        });
+        // Consistência diária - últimos 7 dias (0 se não registrado)
+        const dailyTotals = last7Dates.map(date => {
+            if (!data[date]) return 0;
+            return habits.reduce((acc, habit) => acc + (data[date][habit] ? 1 : 0), 0);
+        });
+        // Atividade mais realizada nos últimos 7 dias
+        const maxCount = Math.max(...Object.values(habitCounts));
+        const mostDone = Object.keys(habitCounts).filter(h => habitCounts[h] === maxCount);
+        // --- NOVO: Análise de todo o histórico para "precisa praticar mais" ---
+        const allDates = Object.keys(data);
+        const allHabitCounts = {};
+        habits.forEach(h => allHabitCounts[h] = 0);
+        allDates.forEach(date => {
+            habits.forEach(habit => {
+                if (data[date] && data[date][habit]) allHabitCounts[habit]++;
+            });
+        });
+        const minCount = Math.min(...Object.values(allHabitCounts));
+        const needPractice = Object.keys(allHabitCounts).filter(h => allHabitCounts[h] === minCount);
+        // Resumo
+        let alert = '';
+        if (needPractice.length > 0) {
+            alert = `<div style="background:#fff3cd;padding:10px;border-radius:6px;border:1px solid #ffeeba;margin-bottom:16px;color:#856404"><b>O que eu preciso praticar mais:</b> ${needPractice.join(', ')}</div>`;
+        }
+        document.getElementById('summary').innerHTML =
+            alert +
+            `<b>Atividade(s) mais realizada(s) (últimos 7 dias):</b> <span style="color:#388e3c">${mostDone.join(', ')}</span> <br>` +
+            `<b>Total de dias analisados:</b> ${last7Dates.length}`;
+        // Gráfico de barras - últimos 7 dias
+        if (barChart) barChart.destroy();
+        barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: habits,
+                datasets: [{
+                    label: 'Frequência de cada hábito (últimos 7 dias)',
+                    data: habits.map(h => habitCounts[h]),
+                    backgroundColor: habits.map(h => mostDone.includes(h) ? '#81c784' : '#ffd6e0')
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, precision: 0 } }
+            }
+        });
+        // Gráfico de linha - últimos 7 dias
+        if (lineChart) lineChart.destroy();
+        lineChart = new Chart(document.getElementById('lineChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: last7Dates,
+                datasets: [{
+                    label: 'Hábitos concluídos por dia (últimos 7 dias)',
+                    data: dailyTotals,
+                    borderColor: '#d16ba5',
+                    backgroundColor: 'rgba(209,107,165,0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                plugins: { legend: { display: true } },
+                scales: { y: { beginAtZero: true, precision: 0 } }
+            }
+        });
+        document.getElementById('dashboard').innerHTML = '';
+    }
+</script>
+</body>
+</html>

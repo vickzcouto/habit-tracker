@@ -4,10 +4,12 @@ from tkcalendar import DateEntry
 import json
 import os
 from datetime import datetime
+from PIL import Image, ImageTk
+from pathlib import Path
 
 HABITS = [
     "oração da manhã",
-    "meditação manhã",
+    "meditação",
     "alongamento",
     "exercício físico",
     "caminhada",
@@ -15,7 +17,8 @@ HABITS = [
     "estudos infra",
     "leitura diária",
     "desenho",
-    "meditação noturna",
+    "aprendi algo novo",
+    "gratidão/afirmações",
     "oração noturna",
 ]
 
@@ -28,7 +31,8 @@ def load_data():
     return {}
 
 def save_data(data):
-    data = dict(sorted(data.items())) 
+    # Ordena as datas em ordem crescente (mais antiga em cima, mais recente embaixo)
+    data = dict(sorted(data.items(), key=lambda x: datetime.strptime(x[0], "%d-%m-%Y") if '-' in x[0] and x[0].count('-')==2 and len(x[0].split('-')[2])==4 else datetime.strptime(x[0], "%Y-%m-%d")))
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -43,8 +47,8 @@ class HabitTrackerApp:
         self.data = load_data()
 
         tk.Label(root, text="Selecione a data:").pack()
-        self.date_picker = DateEntry(root, width=12, background='lightblue',
-                                     foreground='white', borderwidth=2, date_pattern='y-mm-dd')
+        self.date_picker = DateEntry(root, width=12, background='pink',
+                                     foreground='black', borderwidth=2, date_pattern='y-mm-dd')
         self.date_picker.pack(pady=5)
         self.date_picker.bind("<<DateEntrySelected>>", self.on_date_change)
 
@@ -57,6 +61,17 @@ class HabitTrackerApp:
 
         tk.Button(root, text="Salvar Progresso", command=self.save_progress).pack(pady=5)
         tk.Button(root, text="Sair", command=root.quit).pack()
+
+        #Teste de logo
+        self.root = root
+        self.root.geometry("800x600")
+        img_path = Path("img/logo.png")
+        pil_image = Image.open(img_path).resize((60, 30), Image.LANCZOS)
+        tkinter_image = ImageTk.PhotoImage(pil_image)
+        logo_label = tk.Label(root, image=tkinter_image, bg='white')
+        logo_label.image = tkinter_image
+        logo_label.place(relx=1.0, x=-10, y=10, anchor='ne')
+        #fim
 
     def build_checkboxes(self):
         for widget in self.checkbox_frame.winfo_children():
